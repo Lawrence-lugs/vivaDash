@@ -30,16 +30,35 @@ app.layout = [
         'By-family Plotter'
     ),
     dcc.Dropdown(id='waveToPlot',multi=True),
-    dcc.Graph(id='graph-content',
-              style={
-                  'marginLeft':'auto',
-                  'marginRight':'auto',
-                  'align':'center'
-              },
-              config={
-                  'editable':True,  
-                  'toImageButtonOptions': {'format': 'svg'},
-              },
+    html.Div([
+        'Graph Height: \t',
+        dcc.Slider(
+            1,200,
+            marks=None,
+            value=60,
+            id = 'familyGraphHeight'
+        ),
+    ]),
+    html.Div(  
+        id = 'familyGraphContainer',
+        style={
+            'height':'60vh'
+        },
+        children=[
+            dcc.Graph(id='graph-content',
+                    style={
+                        'marginLeft':'auto',
+                        'marginRight':'auto',
+                        'align':'center',
+                        'width':'100%',
+                        'height':'100%',
+                    },
+                    config={
+                        'editable':True,  
+                        'toImageButtonOptions': {'format': 'svg'},
+                    },
+            )
+        ]
     ),
     html.Div([
         html.H3('RegEXP Plotter'),
@@ -52,18 +71,37 @@ app.layout = [
         }
         ),
     ]),
-    
-    dcc.Graph(id='configStringGraph',
-              style={
-                  'marginLeft':'auto',
-                  'marginRight':'auto',
-                  'align':'center'
-              },
-              config={
-                  'editable':True,  
-                  'toImageButtonOptions': {'format': 'svg'},
-              },
-    ),
+    html.Div([
+        'Graph Height: \t',
+        dcc.Slider(
+            1,200,
+            marks=None,
+            value=60,
+            id = 'cfgStringGraphHeight'
+        ),
+    ]),
+    html.Div(  
+        id = 'configGraphContainer',
+        style={
+            'height':'60vh'
+        },
+        children=[
+            dcc.Graph(id='configStringGraph',
+                    style={
+                        'marginLeft':'auto',
+                        'marginRight':'auto',
+                        'align':'center',
+                        'width':'100%',
+                        'height':'100%',
+                    },
+                    config={
+                        'editable':True,  
+                        'toImageButtonOptions': {'format': 'svg'},
+                    },
+                    responsive=True,
+            ),
+        ],
+    )
     # html.Div(['Number of Subplot Rows:',
     # dcc.Input(
     #     id='numRowSubplots',
@@ -80,6 +118,18 @@ app.layout = [
     #     }
     # )
 ]
+
+@callback(
+    Output('familyGraphContainer','style'),
+    Input('familyGraphHeight', 'value')
+)
+@callback(
+    Output('configGraphContainer','style'),
+    Input('cfgStringGraphHeight', 'value')
+)
+def updateCfgGraphContainer(heightString):
+    styleDict = {'height':str(heightString) + 'vh'}
+    return styleDict
 
 @callback(
     [Output('csvNameHeader', 'children'),
@@ -128,6 +178,7 @@ def updateCfgGraph(configString,csvName):
         font_family="Trebuchet MS",
         title_font_family="Trebuchet MS",
     )
+    fig.for_each_annotation(lambda a: a.update(text=''))
     fig.update_yaxes(automargin=True)
 
     return fig
