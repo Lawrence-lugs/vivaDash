@@ -2,6 +2,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+def configFilterFamily(configString,df : pd.DataFrame):
+    tracesPerPlot = parseConfigString(configString,df)
+
+    df['family'] = 'notIncluded'
+
+    for i,tracesInPlot in enumerate(tracesPerPlot):
+        familyString = f'traceSet{i}'
+        for traceName in tracesInPlot:
+            df.loc[df['variable'].str.match(traceName),'family'] = familyString
+
+    return df[df['family'] != 'notIncluded']
+
+def parseConfigString(configString,df):
+    perFamily = configString.split(';')
+    perTracePerFamily = [i.split(',') for i in perFamily]
+    return perTracePerFamily
+
 def processAndMelt(df):
     xcol = [i for i in df.columns if ' X' in i][0]
     df['time'] = df[xcol]

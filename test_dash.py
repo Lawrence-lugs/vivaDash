@@ -16,7 +16,7 @@ app = Dash()
 
 waves = os.listdir('waveforms')
 
-csvName = 'No CSV selected'
+csvName = 'Using CSV: No CSV selected'
 
 app.layout = [
     html.H1(children='Lawrences CSV AutoPlotter'),
@@ -25,6 +25,10 @@ app.layout = [
         id = 'csvNameHeader',
         children=csvName
         ),
+    html.Hr(),
+    html.H3(
+        'By-family Plotter'
+    ),
     dcc.Dropdown(id='waveToPlot',multi=True),
     dcc.Graph(id='graph-content',
               style={
@@ -36,7 +40,30 @@ app.layout = [
                   'editable':True,  
                   'toImageButtonOptions': {'format': 'svg'},
               },
-    )
+    ),
+    html.Div([
+        html.H3('RegEXP Plotter'),
+        'Input Traces separated with ; by row. Add traces via , . e.g. "BL,BLB;SA_OUT,SA_OUTB"',
+        dcc.Input(
+        id = 'wavesConfigString',
+        type = 'text',
+        style={
+            'width':'100%'
+        }
+        ),
+    ]),
+    
+    dcc.Graph(id='configStringGraph',
+              style={
+                  'marginLeft':'auto',
+                  'marginRight':'auto',
+                  'align':'center'
+              },
+              config={
+                  'editable':True,  
+                  'toImageButtonOptions': {'format': 'svg'},
+              },
+    ),
     # html.Div(['Number of Subplot Rows:',
     # dcc.Input(
     #     id='numRowSubplots',
@@ -84,6 +111,25 @@ def update_graph(familylist,csvName):
         title_font_family="Trebuchet MS",
     )
     fig.update_yaxes(automargin=True)
+    return fig
+
+@callback(
+    Output('configStringGraph','figure'),
+    [Input('wavesConfigString', 'value'),
+    Input('csvToParse', 'value'),]
+)
+def updateCfgGraph(configString,csvName):
+    df = pd.read_csv('waveforms/' + csvName)
+    df = lawplotlib.processAndMelt(df)
+    df = lawplotlib.configFilterFamily(configString,df)
+
+    fig = px.line(df,y='value',x='time',facet_row='family',color='variable')
+    fig.update_layout(
+        font_family="Trebuchet MS",
+        title_font_family="Trebuchet MS",
+    )
+    fig.update_yaxes(automargin=True)
+
     return fig
 
 if __name__ == '__main__':
