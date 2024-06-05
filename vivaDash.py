@@ -13,10 +13,8 @@ import plotly.graph_objects as go
 pio.templates.default = 'seaborn'
 
 app = Dash()
-
-waves = os.listdir('waveforms')
-
 csvName = 'Using CSV: No CSV selected'
+waves = os.listdir('waveforms')
 
 app.layout = [
     html.H1(children='Lawrences CSV AutoPlotter'),
@@ -182,6 +180,14 @@ def updateCfgGraph(configString,csvName):
     fig.update_yaxes(automargin=True)
 
     return fig
+
+@callback(
+    Output('csvToParse','options'),
+    Input('csvToParse','value')
+)
+def reloadWaveforms(surrogateValue):
+    return os.listdir('waveforms')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
