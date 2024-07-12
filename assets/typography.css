@@ -3,6 +3,8 @@
 /* Set the default font for the entire document */
 body {
     font-family: "Trebuchet MS", sans-serif;
+    width:960px;
+    margin:0 auto;
 }
 
 /* Additional styling for headings */

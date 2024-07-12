@@ -121,7 +121,7 @@ def make_placeholder_figure():
     return px.scatter(
             x=[1,2,3],
             y=[4,2,4],
-            title='No CSV Selected'
+            title='Nothing to plot'
         )
 
 @callback(
@@ -143,10 +143,11 @@ def updateCfgGraphContainer(heightString):
     Input('csvToParse', 'value')
 )
 def updateSelectedCSV(value):
-    if value is None:
-        return 'No CSV Selected',['a','b']
 
-    df = pd.read_csv('waveforms/' + value)
+    try:
+        df = pd.read_csv('waveforms/' + value)
+    except:
+        return 'No CSV Selected',['a','b']
     df = lawplotlib.processAndMelt(df)
     df = lawplotlib.addFamilyTypeToMeltedDF(df)
     return value, df['family'].unique()
@@ -158,14 +159,13 @@ def updateSelectedCSV(value):
 )
 def update_graph(familylist,csvName):
 
-    if csvName is None:
+    try:
+        df = pd.read_csv('waveforms/' + csvName)
+        df = lawplotlib.processAndMelt(df)
+        df = lawplotlib.addFamilyTypeToMeltedDF(df)
+        df = df[df['family'].isin(familylist)]
+    except:
         return make_placeholder_figure()
-
-    df = pd.read_csv('waveforms/' + csvName)
-    df = lawplotlib.processAndMelt(df)
-    df = lawplotlib.addFamilyTypeToMeltedDF(df)
-
-    df = df[df['family'].isin(familylist)]
 
     fig = px.line(df,y='value',x='time',facet_row='family',color='variable')
     fig.update_layout(
@@ -181,12 +181,13 @@ def update_graph(familylist,csvName):
     Input('csvToParse', 'value'),]
 )
 def updateCfgGraph(configString,csvName):
-    if csvName is None:
+
+    try:
+        df = pd.read_csv('waveforms/' + csvName)
+        df = lawplotlib.processAndMelt(df)
+        df = lawplotlib.configFilterFamily(configString,df)
+    except:
         return make_placeholder_figure()
-    
-    df = pd.read_csv('waveforms/' + csvName)
-    df = lawplotlib.processAndMelt(df)
-    df = lawplotlib.configFilterFamily(configString,df)
 
     fig = px.line(df,y='value',x='time',facet_row='family',color='variable')
     fig.update_layout(
