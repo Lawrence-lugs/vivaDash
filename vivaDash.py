@@ -117,6 +117,13 @@ app.layout = [
     # )
 ]
 
+def make_placeholder_figure():
+    return px.scatter(
+            x=[1,2,3],
+            y=[4,2,4],
+            title='No CSV Selected'
+        )
+
 @callback(
     Output('familyGraphContainer','style'),
     Input('familyGraphHeight', 'value')
@@ -136,6 +143,9 @@ def updateCfgGraphContainer(heightString):
     Input('csvToParse', 'value')
 )
 def updateSelectedCSV(value):
+    if value is None:
+        return 'No CSV Selected',['a','b']
+
     df = pd.read_csv('waveforms/' + value)
     df = lawplotlib.processAndMelt(df)
     df = lawplotlib.addFamilyTypeToMeltedDF(df)
@@ -147,6 +157,10 @@ def updateSelectedCSV(value):
     Input('csvToParse', 'value'),]
 )
 def update_graph(familylist,csvName):
+
+    if csvName is None:
+        return make_placeholder_figure()
+
     df = pd.read_csv('waveforms/' + csvName)
     df = lawplotlib.processAndMelt(df)
     df = lawplotlib.addFamilyTypeToMeltedDF(df)
@@ -167,6 +181,9 @@ def update_graph(familylist,csvName):
     Input('csvToParse', 'value'),]
 )
 def updateCfgGraph(configString,csvName):
+    if csvName is None:
+        return make_placeholder_figure()
+    
     df = pd.read_csv('waveforms/' + csvName)
     df = lawplotlib.processAndMelt(df)
     df = lawplotlib.configFilterFamily(configString,df)
